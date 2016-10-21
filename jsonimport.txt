@@ -1,0 +1,131 @@
+{
+"VPCS": [
+	{
+	"Name": "VPC-SRT-DR",
+	"Region": "US-WEST-1",
+	"CIDR": "20.0.0.0/16",
+	"IGateway": "True",
+	"SecurityGroups":	[
+				{
+				"Name": "SG-DMZWEB",
+				"Description": "SG For the DMZ Web servers",
+				"Rules":	[
+						{
+						"IPRange": "20.0.0.0/16",
+						"Protocol": "-1",
+						"FromPort": "-1",
+						"ToPort": "-1"
+						},
+						{
+						"IPRange": "0.0.0.0/0",
+						"Protocol": "TCP",
+						"FromPort": "443",
+						"ToPort": "443"
+						},
+						{
+						"IPRange": "0.0.0.0/0",
+						"Protocol": "TCP",
+						"FromPort": "3389",
+						"ToPort": "3389"
+						}
+						]
+				},
+				{
+				"Name": "SG-InternalAPP",
+				"Description": "SG For the DMZ Web servers",
+				"Rules":	[
+						{
+						"IPRange": "20.0.0.0/16",
+						"Protocol": "-1",
+						"FromPort": "-1",
+						"ToPort": "-1"
+						}
+						]
+				}
+				],
+	"SUBNETS":	[
+			{
+			"Name": "DMZ",
+			"CIDR": "20.0.1.0/24",
+			"Instances":	[
+					{
+					"ImageId": "ami-c06b24a0",
+					"MinCount": "1",
+					"MaxCount": "1",
+					"InstanceType": "t1.micro",
+					"UserDataFile": "C:\\Users\\sthayne\\Documents\\Powershell Scripts\\Examples\\Objects\\userfileinternal.txt",
+					"EncodeUserData": "",
+					"AssociatePublicIp": 0,
+					"ElasticIP": 0,
+					"KeyName": "westkeypair",
+					"SecurityGroup": "SG-DMZWEB",
+					"Tags": [
+                            			{
+                            			"Name": "DMZWEB01"
+                            			}
+                            			]
+
+
+					}
+					],
+
+
+
+	
+			"RTables":	[
+					{
+					"NAME": "DMZ Routes",
+					"ROUTES":	[
+							{
+							"DestinationCIDR": "0.0.0.0/0",
+							"Target": "IGateway"
+							}
+							]
+					}
+					]
+			},
+			{
+			"Name": "Internal",
+			"CIDR": "20.0.2.0/24",
+			"Instances":	[
+					{
+					"ImageId": "ami-c06b24a0",
+					"MinCount": "1",
+					"MaxCount": "1",
+					"InstanceType": "t1.micro",
+					"EncodeUserData": "",
+					"UserDataFile": "C:\\Users\\sthayne\\Documents\\Powershell Scripts\\Examples\\Objects\\userfileinternal.txt",
+					"AssociatePublicIp": 0,
+					"ElasticIP": 0,
+					"KeyName": "westkeypair",
+					"SecurityGroup": "SG-DMZWEB",
+					"Tags": [
+                            			{
+                            			"Name": "INTAPP01"
+                            			}
+                            			]
+
+
+					}
+					],
+			"RTables":	[
+					{
+					"NAME": "Internal Routes",
+					"ROUTES":	[
+							{
+							"DestinationCIDR": "0.0.0.0/0",
+							"Target": "IGateway"
+							}
+							]
+					}
+					]
+			}
+			]
+	
+	}
+	]			
+}
+				
+					
+
+
