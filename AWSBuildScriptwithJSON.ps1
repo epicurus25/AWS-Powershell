@@ -1,6 +1,8 @@
 ﻿
+Function AWS-BuildEnv($FilePath){
 #This script needs an AWS Account configured, a keypair configured in the region you plan to run this on.
-$newenv = get-content "C:\Users\sthayne\Documents\Powershell Scripts\AWS\jsonimport.txt" -raw | convertfrom-json
+$newenv = get-content $FilePath -raw | convertfrom-json
+#$newenv = get-content "C:\Users\sthayne\Documents\Powershell Scripts\AWS\Ansible\AnsibleEnvironmentjson.txt" -raw | convertfrom-json
 
 
 
@@ -30,7 +32,7 @@ ForEach ($VPC in $newenv.VPCS)
 
     ForEach ($SG in $VPC.SecurityGroups)
         {
-        Write-Host "Creating new Security Groups"
+        Write-Host "Creating new Security Group"
         $NEWSG = New-EC2SecurityGroup -GroupName ($SG.Name) -VpcId $NEWVPC.vpcid -Region $region -Description ($SG.Description)
         
         ForEach ($RL in $SG.Rules)
@@ -73,18 +75,18 @@ ForEach ($VPC in $newenv.VPCS)
                     {
                     If (((($Instance.($prm.name).GetType()).Name) -eq "String") -and (($Instance.($prm.name)).contains(" ")))
                         {
-                        $NICommand.append(" -"+($prm.name) +" "+ '"' + $instance.($prm.name) + '"')
+                        $result = $NICommand.append(" -"+($prm.name) +" "+ '"' + $instance.($prm.name) + '"')
                         }
                     Else
                         {
-                        $NICommand.append(" -"+($prm.name) +" "+ $instance.($prm.name))
+                        $result = $NICommand.append(" -"+($prm.name) +" "+ $instance.($prm.name))
                         }
                     
                     }
                 }
-                If (($Instance.SecurityGroup -ne "") -and ($Instance.SecurityGroup -ne $null)) {$NiCommand.append(" -SecurityGroupId " + (Get-EC2SecurityGroup -Region $region | Where-Object {($_.vpcid -eq $NEWVPC.vpcid) -and ($_.groupname -eq $Instance.SecurityGroup)}).GroupId + " ")}
-                $NICommand.append(" -SubnetId " + $NEWSUBNET.SubnetId + " ")
-                $NICommand.append(" -Region " + $region + " ")
+                If (($Instance.SecurityGroup -ne "") -and ($Instance.SecurityGroup -ne $null)) {$result = $NiCommand.append(" -SecurityGroupId " + (Get-EC2SecurityGroup -Region $region | Where-Object {($_.vpcid -eq $NEWVPC.vpcid) -and ($_.groupname -eq $Instance.SecurityGroup)}).GroupId + " ")}
+                $result = $NICommand.append(" -SubnetId " + $NEWSUBNET.SubnetId + " ")
+                $result = $NICommand.append(" -Region " + $region + " ")
 
 
             Write-Host "Creating EC2 Instance: "$Instance.Name
@@ -104,7 +106,7 @@ ForEach ($VPC in $newenv.VPCS)
                 }
 
             Write-Host "EC2 Instance Created"
-            If ($Instance.AssociatePublicIp -eq 0)
+            If ($Instance.AssociatePublicIp -eq 1)
                 {
                 Write-Host "Public IP is: "(Get-EC2Instance -Region $region $NEWInstance).RunningInstance.PublicIPAddress
                 }
@@ -147,4 +149,4 @@ ForEach ($VPC in $newenv.VPCS)
     $NEWIGW = $null
     $region = $null
     }
-
+    }
